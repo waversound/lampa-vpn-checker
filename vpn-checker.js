@@ -5,33 +5,45 @@
         );
     }
 
-    function showCustomBanner(message) {
+    function showStyledLampaBanner(message) {
         const existing = document.getElementById('vpn-warning');
         if (existing) existing.remove();
 
         const div = document.createElement('div');
         div.id = 'vpn-warning';
-        div.style.position = 'fixed';
-        div.style.bottom = '5%';
-        div.style.left = '50%';
-        div.style.transform = 'translateX(-50%)';
-        div.style.background = 'rgba(0, 0, 0, 0.85)';
-        div.style.color = '#fff';
-        div.style.padding = '20px 25px';
-        div.style.fontSize = '20px';
-        div.style.borderRadius = '10px';
-        div.style.zIndex = '9999';
-        div.style.textAlign = 'center';
-        div.style.boxShadow = '0 0 15px rgba(0,0,0,0.5)';
-        div.style.maxWidth = '90%';
 
-        div.innerText = message;
+        // Стилизация как у уведомлений Lampa
+        Object.assign(div.style, {
+            position: 'fixed',
+            bottom: '100px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#202020',
+            color: '#fff',
+            padding: '18px 28px',
+            fontSize: '18px',
+            fontWeight: '400',
+            borderRadius: '10px',
+            zIndex: '9999',
+            textAlign: 'center',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
+            maxWidth: '90%',
+            transition: 'opacity 0.3s ease',
+            opacity: '0',
+        });
 
+        div.textContent = message;
         document.body.appendChild(div);
 
+        // Плавное появление
+        requestAnimationFrame(() => {
+            div.style.opacity = '1';
+        });
+
         setTimeout(() => {
-            div.remove();
-        }, 5000);
+            div.style.opacity = '0';
+            setTimeout(() => div.remove(), 300);
+        }, 5000); // 5 секунд
     }
 
     function checkVPN() {
@@ -49,7 +61,7 @@
 
                 if (countryCode !== 'RU') {
                     const message = `You are in: ${countryName} ${flag}. VPN might be enabled. Please disable it for stable operation.`;
-                    showCustomBanner(message);
+                    showStyledLampaBanner(message);
                 } else {
                     console.log('[VPN Plugin] IP из РФ, всё в порядке.');
                 }
