@@ -37,7 +37,7 @@
                 max-width: 90%;
             ">
                 <div style="font-size: 24px; margin-bottom: 10px;">
-                    ⚠️ VPN Обнаружен
+                    ⚠️ Отключите VPN !
                 </div>
                 <div style="font-size: 16px; margin-bottom: 20px;">
                     🛡️ Ваш IP: <b>${ip}</b><br>
