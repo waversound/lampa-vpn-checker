@@ -23,22 +23,41 @@
         div.style.zIndex = '9999';
         div.style.textAlign = 'center';
         div.style.boxShadow = '0 0 15px rgba(0,0,0,0.5)';
-        div.innerText = message;
+        div.style.outline = 'none';
 
-        const btn = document.createElement('div');
+        const text = document.createElement('div');
+        text.innerText = message;
+
+        const btn = document.createElement('button');
         btn.innerText = 'ОК';
-        btn.style.marginTop = '10px';
-        btn.style.padding = '8px 15px';
+        btn.style.marginTop = '15px';
+        btn.style.padding = '10px 20px';
         btn.style.background = '#ff5f5f';
+        btn.style.border = 'none';
         btn.style.borderRadius = '6px';
         btn.style.cursor = 'pointer';
-        btn.style.display = 'inline-block';
         btn.style.fontWeight = 'bold';
+        btn.style.fontSize = '18px';
+        btn.style.color = '#fff';
+        btn.setAttribute('tabindex', '1');
+        btn.classList.add('focus-visible'); // Поддержка стиля фокуса
         btn.onclick = () => div.remove();
 
-        div.appendChild(document.createElement('br'));
-        div.appendChild(btn);
+        // Добавим фокус при открытии
+        setTimeout(() => {
+            btn.focus();
+        }, 100);
 
+        // Обработка нажатия OK с пульта (Enter)
+        document.addEventListener('keydown', function onKey(e) {
+            if (e.key === 'Enter' && document.activeElement === btn) {
+                btn.click();
+                document.removeEventListener('keydown', onKey);
+            }
+        });
+
+        div.appendChild(text);
+        div.appendChild(btn);
         document.body.appendChild(div);
     }
 
