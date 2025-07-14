@@ -1,131 +1,167 @@
 (function() {
-    // 1. Проверка VPN через самый надежный метод
+    // 1. VPN Check with Fallback
     function checkVPN() {
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                if (data.country && data.country !== 'RU') {
-                    showIronBanner(data.country, data.ip);
-                }
-            })
-            .catch(e => console.error('VPN check error:', e));
+        const fallback = () => {
+            console.warn('IP API failed, using fallback');
+            return { country: 'Unknown', ip: '127.0.0.1' };
+        };
+
+        Promise.race([
+            fetch('https://ipapi.co/json/').then(r => r.json()),
+            new Promise(resolve => setTimeout(() => resolve(fallback()), 3000))
+        ])
+        .then(data => {
+            if (data.country !== 'RU') {
+                createFortressBanner(data.country, data.ip);
+            }
+        })
+        .catch(fallback);
     }
 
-    // 2. Баннер с ядерной защитой
-    function showIronBanner(country, ip) {
-        // Создаем железный контейнер
-        const ironContainer = document.createElement('div');
-        ironContainer.id = 'iron-vpn-container';
-        ironContainer.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 2147483647; /* Максимальный возможный */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+    // 2. Bulletproof Banner Implementation
+    function createFortressBanner(country, ip) {
+        // Create atomic container
+        const fortress = document.createElement('div');
+        fortress.id = 'vpn-fortress';
+        fortress.style.cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: rgba(0,0,0,0.97) !important;
+            z-index: 2147483647 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            flex-direction: column !important;
         `;
 
-        // Содержимое баннера
-        ironContainer.innerHTML = `
-            <div style="
-                background: #222;
-                padding: 25px;
-                border-radius: 12px;
-                text-align: center;
-                max-width: 80%;
-            ">
-                <h2 style="color: #ff4444; margin-top: 0;">⚠️ VPN Обнаружен</h2>
-                <p style="font-size: 16px;">Ваш IP: <b>${ip}</b><br>Страна: <b>${country}</b></p>
-                <p>Для продолжения работы отключите VPN</p>
-                <button id="iron-vpn-button" 
-                    tabindex="0"
-                    style="
-                        background: #ff3333;
-                        color: white;
-                        border: none;
-                        padding: 12px 24px;
-                        font-size: 18px;
-                        border-radius: 6px;
-                        margin-top: 20px;
-                    ">ПОНЯТНО</button>
+        // Create shadow DOM for isolation
+        const shadow = fortress.attachShadow({ mode: 'closed' });
+        shadow.innerHTML = `
+            <style>
+                .banner-core {
+                    background: linear-gradient(135deg, #222, #111) !important;
+                    padding: 30px !important;
+                    border-radius: 15px !important;
+                    text-align: center !important;
+                    max-width: 85% !important;
+                    box-shadow: 0 0 30px black !important;
+                    border: 2px solid #ff4444 !important;
+                }
+                .vpn-btn {
+                    background: linear-gradient(to bottom, #ff3333, #dd2222) !important;
+                    color: white !important;
+                    border: none !important;
+                    padding: 15px 30px !important;
+                    font-size: 20px !important;
+                    border-radius: 8px !important;
+                    margin-top: 25px !important;
+                    cursor: pointer !important;
+                    min-width: 120px !important;
+                }
+                .vpn-btn:focus {
+                    outline: 4px solid white !important;
+                    animation: pulse 1.5s infinite !important;
+                }
+                @keyframes pulse {
+                    0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
+                    70% { box-shadow: 0 0 0 15px rgba(255,255,255,0); }
+                    100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+                }
+            </style>
+            <div class="banner-core">
+                <h2 style="color:#ff4444;margin-top:0;font-size:28px;">⚠️ VPN DETECTED</h2>
+                <div style="font-size:18px;line-height:1.5;">
+                    <p>Your IP: <b>${ip}</b></p>
+                    <p>Country: <b>${country}</b></p>
+                    <p style="margin-bottom:0;">Please disable VPN to continue</p>
+                </div>
+                <button class="vpn-btn" tabindex="0">UNDERSTOOD</button>
             </div>
         `;
 
-        // Добавляем в самое начало body
-        document.body.insertAdjacentElement('afterbegin', ironContainer);
-        const button = document.getElementById('iron-vpn-button');
+        // Add to document
+        document.documentElement.appendChild(fortress);
 
-        // 3. Атомарный контроль фокуса
-        function enforceFocus() {
-            button.focus();
-            button.style.boxShadow = '0 0 0 3px white, 0 0 20px red';
-        }
+        // Focus management
+        const btn = shadow.querySelector('.vpn-btn');
+        let focusLock = true;
 
-        // Первый фокус с задержкой
-        setTimeout(enforceFocus, 350);
+        const enforceFocus = () => {
+            if (focusLock) btn.focus();
+        };
 
-        // Постоянная защита фокуса
-        const focusGuard = setInterval(enforceFocus, 250);
+        // Initial focus
+        setTimeout(enforceFocus, 500);
 
-        // 4. Абсолютная блокировка событий
-        function handleButtonAction() {
-            clearInterval(focusGuard);
-            ironContainer.remove();
-        }
+        // Focus keeper
+        const focusInterval = setInterval(enforceFocus, 300);
 
-        // Все возможные способы взаимодействия
-        button.addEventListener('click', handleButtonAction);
-        button.addEventListener('keydown', (e) => {
+        // Event handlers
+        btn.addEventListener('click', () => {
+            focusLock = false;
+            clearInterval(focusInterval);
+            fortress.remove();
+        });
+
+        // TV remote control handling
+        const handleKey = (e) => {
             if ([13, 415].includes(e.keyCode)) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
-                handleButtonAction();
+                btn.click();
             }
-        });
+            enforceFocus();
+        };
 
-        // 5. Железная защита от любых других действий
-        ironContainer.addEventListener('keydown', (e) => {
+        btn.addEventListener('keydown', handleKey);
+        fortress.addEventListener('keydown', (e) => {
             e.preventDefault();
             e.stopImmediatePropagation();
             enforceFocus();
         });
 
-        ironContainer.addEventListener('click', (e) => {
-            if (!e.target.closest('#iron-vpn-button')) {
+        // System-level protection
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('vpn-fortress')) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 enforceFocus();
             }
+        }, true);
+
+        // Visual focus indicator
+        btn.addEventListener('focus', () => {
+            btn.style.transform = 'scale(1.05)';
         });
 
-        // 6. Защита от попыток Lampa перехватить управление
-        document.addEventListener('keydown', globalKeyHandler);
-        function globalKeyHandler(e) {
-            if (document.getElementById('iron-vpn-container')) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                enforceFocus();
-            }
+        btn.addEventListener('blur', () => {
+            btn.style.transform = '';
+            if (focusLock) setTimeout(() => btn.focus(), 50);
+        });
+    }
+
+    // 3. Init with protection
+    function init() {
+        if (typeof Lampa !== 'undefined') {
+            setTimeout(checkVPN, 2000);
+        } else {
+            const observer = new MutationObserver(() => {
+                if (typeof Lampa !== 'undefined') {
+                    observer.disconnect();
+                    setTimeout(checkVPN, 1500);
+                }
+            });
+            observer.observe(window, { attributes: true, childList: true, subtree: true });
         }
     }
 
-    // Запуск с защитой от дурака
-    function safeInit() {
-        try {
-            if (window.Lampa) {
-                setTimeout(checkVPN, 2000);
-            } else {
-                document.addEventListener('DOMContentLoaded', checkVPN);
-            }
-        } catch (e) {
-            console.error('VPN plugin error:', e);
-        }
+    // Start
+    if (document.readyState === 'complete') {
+        init();
+    } else {
+        window.addEventListener('load', init);
     }
-
-    safeInit();
 })();
