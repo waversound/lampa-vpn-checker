@@ -14,15 +14,15 @@
 
         Object.assign(container.style, {
             position: 'fixed',
-            bottom: '100px',
+            bottom: '80px',          // 100px * 0.8
             left: '50%',
             transform: 'translateX(-50%)',
             background: '#202020',
             color: '#fff',
-            padding: '20px 30px',
+            padding: '16px 24px',    // 20px * 0.8, 30px * 0.8
             fontFamily: 'Arial, sans-serif',
-            maxWidth: '400px',
-            borderRadius: '8px',
+            maxWidth: '320px',       // 400px * 0.8
+            borderRadius: '6.4px',   // 8px * 0.8
             boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
             textAlign: 'center',
             zIndex: '9999',
@@ -37,8 +37,8 @@
         mainText.textContent = 'Отключите VPN';
         Object.assign(mainText.style, {
             fontWeight: '700',
-            fontSize: '16px',
-            marginBottom: '8px',
+            fontSize: '12.8px',      // 16px * 0.8
+            marginBottom: '6.4px',   // 8px * 0.8
         });
 
         // Подтекст
@@ -46,7 +46,7 @@
         subText.textContent = `Вы находитесь в стране: ${countryName} ${flag}. Пожалуйста, отключите VPN для стабильной работы.`;
         Object.assign(subText.style, {
             fontWeight: '400',
-            fontSize: '14px',
+            fontSize: '11.2px',      // 14px * 0.8
         });
 
         container.appendChild(mainText);
