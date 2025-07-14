@@ -88,36 +88,24 @@
                 wrapper.remove();
                 style.remove();
                 document.removeEventListener('focusin', trapFocus, true);
-                document.removeEventListener('keydown', globalKeydownHandler, true);
+                document.removeEventListener('keydown', blockAllKeys, true);
             });
         }
 
-        // Глобальный обработчик keydown, чтобы блокировать "проброс" кнопок пульта
-        function globalKeydownHandler(event) {
-            // Ловим Enter/OK (13) и пульты, которые могут посылать keyCode 13 или event.key === 'Enter'
+        // Функция блокировки всех клавиш
+        function blockAllKeys(event) {
+            // Блокируем все нажатия
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            // Если нажали Enter или OK - закрываем баннер
             if (event.key === 'Enter' || event.keyCode === 13) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
                 closeBanner();
             }
         }
 
-        // Обработчики кнопки (мышь и клавиатура)
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            closeBanner();
-        });
-
-        btn.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' || event.keyCode === 13) {
-                event.preventDefault();
-                event.stopPropagation();
-                closeBanner();
-            }
-        });
-
-        // Блокируем фокус за пределами баннера
+        // Обработчик фокуса - чтобы не уходил с баннера
         function trapFocus(event) {
             if (!banner.contains(event.target)) {
                 event.stopPropagation();
@@ -126,10 +114,10 @@
         }
         document.addEventListener('focusin', trapFocus, true);
 
-        // Вешаем глобальный перехватчик на документ с очень высоким приоритетом (true — capture)
-        document.addEventListener('keydown', globalKeydownHandler, true);
+        // Навесим жесткий блокировщик на keydown (в capture режиме, чтобы раньше остальных)
+        document.addEventListener('keydown', blockAllKeys, true);
 
-        // Переключаем фокус через временный скрытый элемент, чтобы снять фокус с других элементов
+        // Установка фокуса на кнопку с временным скрытым элементом
         const tempFocusEl = document.createElement('input');
         tempFocusEl.style.position = 'fixed';
         tempFocusEl.style.left = '-10000px';
