@@ -8,36 +8,52 @@
         return String.fromCodePoint(...codePoints);
     }
 
-    function checkVPN() {
-        fetch('https://ipinfo.io/json?token=ce7ef8c0a3c947')
+    function showWarning(country) {
+        const flag = getFlagEmoji(country);
+        const message = `${flag} Обнаружен VPN или Вы вне России (${country}). Пожалуйста, отключите VPN для корректной работы.`;
+
+        if (!localStorage.getItem('vpnWarningShown')) {
+            if (window.Lampa && Lampa.Noty && typeof Lampa.Noty.show === 'function') {
+                Lampa.Noty.show(message);
+                localStorage.setItem('vpnWarningShown', 'true');
+            } else {
+                console.log('[VPN Plugin] Lampa.Noty.show не доступен');
+            }
+        }
+    }
+
+    function checkVPN(url) {
+        fetch(url)
             .then(response => response.json())
             .then(data => {
-                const country = data.country || '';
-
-                if (country !== 'RU') {
-                    const flag = getFlagEmoji(country);
-                    const message = `${flag} Обнаружен VPN или Вы вне России (${country}). Пожалуйста, отключите VPN для корректной работы.`;
-
-                    if (!localStorage.getItem('vpnWarningShown')) {
-                        if (window.Lampa && Lampa.Noty && typeof Lampa.Noty.show === 'function') {
-                            Lampa.Noty.show(message);
-                            localStorage.setItem('vpnWarningShown', 'true');
-                        } else {
-                            console.log('[VPN Plugin] Lampa.Noty.show не доступен');
-                        }
+                if (data.status === 'success') {
+                    const country = data.countryCode || '';
+                    if (country !== 'RU') {
+                        showWarning(country);
+                    } else {
+                        console.log('[VPN Plugin] IP из РФ, всё в порядке');
+                        localStorage.removeItem('vpnWarningShown');
                     }
                 } else {
-                    console.log('[VPN Plugin] IP из РФ, всё в порядке');
-                    localStorage.removeItem('vpnWarningShown');
+                    // Если запрос не успешен и был HTTPS — пробуем HTTP
+                    if (url.startsWith('https')) {
+                        checkVPN('http://ip-api.com/json/?fields=status,countryCode');
+                    } else {
+                        console.log('[VPN Plugin] Не удалось получить статус IP');
+                    }
                 }
             })
             .catch(error => {
                 console.log('[VPN Plugin] Ошибка получения IP-информации:', error);
+                // Если ошибка и был HTTPS — пробуем HTTP
+                if (url.startsWith('https')) {
+                    checkVPN('http://ip-api.com/json/?fields=status,countryCode');
+                }
             });
     }
 
     if (window.Lampa) {
-        checkVPN();
+        checkVPN('https://ip-api.com/json/?fields=status,countryCode');
     } else {
         console.log('[VPN Plugin] Lampa не загружена');
     }
