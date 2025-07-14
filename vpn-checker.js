@@ -1,71 +1,20 @@
 (function () {
     function checkVPN() {
-        fetch('http://ip-api.com/json/?fields=status,country,countryCode,query')
+        fetch('https://ipinfo.io/json?token=ce7ef8c0a3c947')
             .then(response => response.json())
             .then(data => {
-                console.log('[VPN Plugin] IP-ответ:', data);
+                const country = data.country || '';
 
-                if (data.status === 'success') {
-                    if (data.countryCode !== 'RU') {
-                        showVPNBanner(data.country, data.query);
-                    } else {
-                        console.log('[VPN Plugin] IP из РФ, всё нормально');
-                    }
+                // Если страна — не Россия, показываем предупреждение
+                if (country !== 'RU') {
+                    Lampa.Noty.show('⚠️ Вы находитесь за пределами РФ или используете VPN. Отключите его для стабильной работы.');
                 } else {
-                    console.log('[VPN Plugin] Не удалось определить IP');
+                    console.log('[VPN Plugin] IP из РФ, всё в порядке');
                 }
             })
             .catch(error => {
                 console.log('[VPN Plugin] Ошибка получения IP-информации:', error);
             });
-    }
-
-    function showVPNBanner(country, ip) {
-        const html = `
-            <div class="vpn-warning-banner" style="
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(30,30,30,0.95);
-                padding: 20px 25px;
-                border-radius: 16px;
-                z-index: 9999;
-                text-align: center;
-                color: #fff;
-                box-shadow: 0 0 20px rgba(0,0,0,0.5);
-                max-width: 90%;
-            ">
-                <div style="font-size: 24px; margin-bottom: 10px;">
-                    ⚠️ VPN Обнаружен
-                </div>
-                <div style="font-size: 16px; margin-bottom: 20px;">
-                    🛡️ Ваш IP: <b>${ip}</b><br>
-                    Страна: <b>${country}</b><br>
-                    Отключите VPN для стабильной работы Lampa.
-                </div>
-                <button class="vpn-banner-close" style="
-                    padding: 10px 20px;
-                    background: #ff4444;
-                    color: #fff;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 16px;
-                    cursor: pointer;
-                ">
-                    Ок
-                </button>
-            </div>
-        `;
-
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = html;
-        document.body.appendChild(wrapper);
-
-        const btn = wrapper.querySelector('.vpn-banner-close');
-        btn.addEventListener('click', () => {
-            wrapper.remove();
-        });
     }
 
     if (window.Lampa) {
