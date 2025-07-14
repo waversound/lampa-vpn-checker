@@ -1,13 +1,15 @@
 (function () {
+    // Функция конвертации кода страны в эмодзи-флаг
     function getFlagEmoji(countryCode) {
         if (!countryCode || countryCode.length !== 2) return '';
         const codePoints = countryCode
             .toUpperCase()
             .split('')
-            .map(char => 127397 + char.charCodeAt());
+            .map(c => 127397 + c.charCodeAt());
         return String.fromCodePoint(...codePoints);
     }
 
+    // Показ уведомления с предупреждением
     function showWarning(country) {
         const flag = getFlagEmoji(country);
         const message = `${flag} Обнаружен VPN или Вы вне России (${country}). Пожалуйста, отключите VPN для корректной работы.`;
@@ -22,38 +24,27 @@
         }
     }
 
-    function checkVPN(url) {
-        fetch(url)
-            .then(response => response.json())
+    // Проверка IP и страны
+    function checkVPN() {
+        fetch('https://freegeoip.app/json/')
+            .then(res => res.json())
             .then(data => {
-                if (data.status === 'success') {
-                    const country = data.countryCode || '';
-                    if (country !== 'RU') {
-                        showWarning(country);
-                    } else {
-                        console.log('[VPN Plugin] IP из РФ, всё в порядке');
-                        localStorage.removeItem('vpnWarningShown');
-                    }
+                const country = data.country_code || '';
+                if (country !== 'RU') {
+                    showWarning(country);
                 } else {
-                    // Если запрос не успешен и был HTTPS — пробуем HTTP
-                    if (url.startsWith('https')) {
-                        checkVPN('http://ip-api.com/json/?fields=status,countryCode');
-                    } else {
-                        console.log('[VPN Plugin] Не удалось получить статус IP');
-                    }
+                    console.log('[VPN Plugin] IP из РФ, всё в порядке');
+                    localStorage.removeItem('vpnWarningShown');
                 }
             })
-            .catch(error => {
-                console.log('[VPN Plugin] Ошибка получения IP-информации:', error);
-                // Если ошибка и был HTTPS — пробуем HTTP
-                if (url.startsWith('https')) {
-                    checkVPN('http://ip-api.com/json/?fields=status,countryCode');
-                }
+            .catch(err => {
+                console.log('[VPN Plugin] Ошибка получения IP:', err);
             });
     }
 
+    // Стартуем при загрузке Lampa
     if (window.Lampa) {
-        checkVPN('https://ip-api.com/json/?fields=status,countryCode');
+        checkVPN();
     } else {
         console.log('[VPN Plugin] Lampa не загружена');
     }
