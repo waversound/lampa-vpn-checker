@@ -48,3 +48,29 @@
                     padding: 10px 20px;
                     background: #ff4444;
                     color: #fff;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    cursor: pointer;
+                ">
+                    Ок
+                </button>
+            </div>
+        `;
+
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        document.body.appendChild(wrapper);
+
+        const btn = wrapper.querySelector('.vpn-banner-close');
+        btn.addEventListener('click', () => {
+            wrapper.remove();
+        });
+    }
+
+    if (window.Lampa) {
+        checkVPN();
+    } else {
+        console.log('[VPN Plugin] Lampa не загружена');
+    }
+})();
