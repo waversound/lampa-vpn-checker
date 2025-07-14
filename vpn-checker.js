@@ -1,19 +1,22 @@
 (function () {
     function checkVPN() {
-        fetch('https://ipinfo.io/json?token=ce7ef8c0a3c947')
-            .then(response => response.json())
+        fetch('https://ipwhois.app/json/')
+            .then(response => {
+                if (!response.ok) throw new Error('Ошибка ответа от API');
+                return response.json();
+            })
             .then(data => {
-                const country = data.country || '';
+                const country = data.country_code || '';
+                console.log('[VPN Plugin] Обнаружен код страны:', country);
 
-                // Если страна — не Россия, показываем предупреждение
                 if (country !== 'RU') {
-                    Lampa.Noty.show('⚠️ Вы находитесь за пределами РФ или используете VPN. Отключите его для стабильной работы.');
+                    Lampa.Noty.show(`⚠️ Вы находитесь в стране: ${country}. Возможно, включён VPN. Отключите его для стабильной работы.`);
                 } else {
-                    console.log('[VPN Plugin] IP из РФ, всё в порядке');
+                    console.log('[VPN Plugin] IP из РФ, всё в порядке.');
                 }
             })
             .catch(error => {
-                console.log('[VPN Plugin] Ошибка получения IP-информации:', error);
+                console.log('[VPN Plugin] Ошибка получения IP:', error);
             });
     }
 
