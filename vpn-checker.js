@@ -81,6 +81,27 @@
         const banner = wrapper.querySelector('.vpn-warning-banner');
         const btn = wrapper.querySelector('.vpn-banner-close');
 
+        // Функция закрытия баннера
+        function closeBanner() {
+            banner.style.animation = 'fadeOut 0.4s forwards';
+            banner.addEventListener('animationend', () => {
+                wrapper.remove();
+                style.remove();
+                document.removeEventListener('focusin', trapFocus, true);
+            });
+        }
+
+        // Обработчики кнопки
+        btn.addEventListener('click', closeBanner);
+
+        btn.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.keyCode === 13) {
+                event.preventDefault();
+                event.stopPropagation();
+                closeBanner();
+            }
+        });
+
         // Блокируем фокус за пределами баннера
         function trapFocus(event) {
             if (!banner.contains(event.target)) {
@@ -106,15 +127,6 @@
             btn.focus();
             tempFocusEl.remove();
         }, 50);
-
-        btn.addEventListener('click', () => {
-            banner.style.animation = 'fadeOut 0.4s forwards';
-            banner.addEventListener('animationend', () => {
-                wrapper.remove();
-                style.remove();
-                document.removeEventListener('focusin', trapFocus, true);
-            });
-        });
     }
 
     if (window.Lampa) {
