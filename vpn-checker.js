@@ -81,12 +81,7 @@
         const banner = wrapper.querySelector('.vpn-warning-banner');
         const btn = wrapper.querySelector('.vpn-banner-close');
 
-        // Фокус с задержкой, чтобы перехватить фокус Lampa
-        setTimeout(() => {
-            btn.focus();
-        }, 200);
-
-        // Перехватываем попытки фокуса уйти за пределы баннера
+        // Блокируем фокус за пределами баннера
         function trapFocus(event) {
             if (!banner.contains(event.target)) {
                 event.stopPropagation();
@@ -94,6 +89,23 @@
             }
         }
         document.addEventListener('focusin', trapFocus, true);
+
+        // Переключаем фокус через временный скрытый элемент, чтобы снять фокус с других элементов
+        const tempFocusEl = document.createElement('input');
+        tempFocusEl.style.position = 'fixed';
+        tempFocusEl.style.left = '-10000px';
+        tempFocusEl.style.top = 'auto';
+        tempFocusEl.style.width = '1px';
+        tempFocusEl.style.height = '1px';
+        tempFocusEl.tabIndex = -1;
+        document.body.appendChild(tempFocusEl);
+
+        tempFocusEl.focus();
+
+        setTimeout(() => {
+            btn.focus();
+            tempFocusEl.remove();
+        }, 50);
 
         btn.addEventListener('click', () => {
             banner.style.animation = 'fadeOut 0.4s forwards';
