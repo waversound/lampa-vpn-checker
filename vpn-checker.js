@@ -18,17 +18,8 @@
             return;
         }
 
-        Lampa.Toast.show({
-            text: `⚠️ Вы не в России (${countryCode}). Пожалуйста, отключите VPN.`,
-            time: 10000, // показывать 10 секунд
-            icon: '⚠️',
-            button: {
-                text: 'Ок',
-                click: () => {
-                    Lampa.Toast.hide();
-                }
-            }
-        });
+        // Просто показать текст на 10 секунд
+        Lampa.Toast.show(`⚠️ Вы не в России (${countryCode}). Пожалуйста, отключите VPN.`, 10000);
     }
 
     if (window.Lampa) {
