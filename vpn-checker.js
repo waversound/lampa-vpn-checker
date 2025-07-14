@@ -88,13 +88,28 @@
                 wrapper.remove();
                 style.remove();
                 document.removeEventListener('focusin', trapFocus, true);
+                document.removeEventListener('keydown', globalKeydownHandler, true);
             });
         }
 
-        // Обработчики кнопки
-        btn.addEventListener('click', closeBanner);
+        // Глобальный обработчик keydown, чтобы блокировать "проброс" кнопок пульта
+        function globalKeydownHandler(event) {
+            // Ловим Enter/OK (13) и пульты, которые могут посылать keyCode 13 или event.key === 'Enter'
+            if (event.key === 'Enter' || event.keyCode === 13) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                closeBanner();
+            }
+        }
 
-        btn.addEventListener('keydown', function(event) {
+        // Обработчики кнопки (мышь и клавиатура)
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeBanner();
+        });
+
+        btn.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' || event.keyCode === 13) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -110,6 +125,9 @@
             }
         }
         document.addEventListener('focusin', trapFocus, true);
+
+        // Вешаем глобальный перехватчик на документ с очень высоким приоритетом (true — capture)
+        document.addEventListener('keydown', globalKeydownHandler, true);
 
         // Переключаем фокус через временный скрытый элемент, чтобы снять фокус с других элементов
         const tempFocusEl = document.createElement('input');
