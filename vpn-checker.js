@@ -1,22 +1,4 @@
 (function () {
-    // Сопоставление английских названий стран с русскими
-    const countryTranslations = {
-        'Russia': 'Россия',
-        'Finland': 'Финляндия',
-        'United States': 'США',
-        'Germany': 'Германия',
-        'Netherlands': 'Нидерланды',
-        'France': 'Франция',
-        'Sweden': 'Швеция',
-        'United Kingdom': 'Великобритания',
-        'Canada': 'Канада',
-        'Ukraine': 'Украина',
-        'Singapore': 'Сингапур',
-        'Norway': 'Норвегия',
-        'Kazakhstan': 'Казахстан',
-        // Добавляй по необходимости
-    };
-
     function getCountryFlag(code) {
         return code.toUpperCase().replace(/./g, char =>
             String.fromCodePoint(127397 + char.charCodeAt())
@@ -60,14 +42,13 @@
             })
             .then(data => {
                 const countryCode = data.country_code || '';
-                const countryNameEng = data.country || '';
-                const countryNameRu = countryTranslations[countryNameEng] || countryNameEng;
+                const countryName = data.country || '';
                 const flag = getCountryFlag(countryCode);
 
-                console.log(`[VPN Plugin] Обнаружена страна: ${countryNameEng} (${countryCode})`);
+                console.log(`[VPN Plugin] Обнаружена страна: ${countryName} (${countryCode})`);
 
                 if (countryCode !== 'RU') {
-                    const message = `Вы находитесь в стране: ${countryNameRu} ${flag}. Возможно, включён VPN. Отключите его для стабильной работы.`;
+                    const message = `You are in: ${countryName} ${flag}. VPN might be enabled. Please disable it for stable operation.`;
                     showCustomBanner(message);
                 } else {
                     console.log('[VPN Plugin] IP из РФ, всё в порядке.');
