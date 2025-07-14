@@ -41,7 +41,7 @@
         });
 
         const subText = document.createElement('div');
-        subText.textContent = `Вы находитесь в стране: ${countryName} ${flag}. Пожалуйста, отключите VPN для стабильной работы.`;
+        subText.textContent = `Вы находитесь в стране: ${countryName} ${flag}. Отключите VPN для стабильной работы.`;
         Object.assign(subText.style, {
             fontWeight: '400',
             fontSize: '11.2px',
