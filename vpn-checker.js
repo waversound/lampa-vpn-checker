@@ -49,17 +49,20 @@
                 border-radius: 8px;
                 font-size: 16px;
                 cursor: pointer;
-                transition: background-color 0.3s;
+                transition: background-color 0.3s, box-shadow 0.3s;
+                outline: none;
             }
-            .vpn-banner-close:hover {
+            .vpn-banner-close:hover,
+            .vpn-banner-close:focus {
                 background-color: #cc3333;
+                box-shadow: 0 0 8px 3px #ff6666;
             }
         `;
         document.head.appendChild(style);
 
         const html = `
-            <div class="vpn-warning-banner">
-                <div style="font-size: 24px; margin-bottom: 10px;">
+            <div class="vpn-warning-banner" role="alert" aria-modal="true" aria-labelledby="vpnBannerTitle" tabindex="-1">
+                <div id="vpnBannerTitle" style="font-size: 24px; margin-bottom: 10px;">
                     ⚠️ VPN Обнаружен
                 </div>
                 <div style="font-size: 16px; margin-bottom: 20px;">
@@ -67,7 +70,7 @@
                     Страна: <b>${country}</b><br>
                     Отключите VPN для стабильной работы Lampa.
                 </div>
-                <button class="vpn-banner-close">Ок</button>
+                <button class="vpn-banner-close" tabindex="0">Ок</button>
             </div>
         `;
 
@@ -78,18 +81,26 @@
         const banner = wrapper.querySelector('.vpn-warning-banner');
         const btn = wrapper.querySelector('.vpn-banner-close');
 
-        btn.setAttribute('tabindex', '0');
-
-        // Фокус с задержкой, чтобы перекрыть фокус Lampa
+        // Фокус с задержкой, чтобы перехватить фокус Lampa
         setTimeout(() => {
             btn.focus();
         }, 200);
+
+        // Перехватываем попытки фокуса уйти за пределы баннера
+        function trapFocus(event) {
+            if (!banner.contains(event.target)) {
+                event.stopPropagation();
+                btn.focus();
+            }
+        }
+        document.addEventListener('focusin', trapFocus, true);
 
         btn.addEventListener('click', () => {
             banner.style.animation = 'fadeOut 0.4s forwards';
             banner.addEventListener('animationend', () => {
                 wrapper.remove();
                 style.remove();
+                document.removeEventListener('focusin', trapFocus, true);
             });
         });
     }
