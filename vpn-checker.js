@@ -1,32 +1,31 @@
 (function () {
-    function showWarning(country) {
-        const message = `Внимание! Вы используете VPN или находитесь вне России (${country}). Отключите VPN для корректной работы.`;
-        if (window.Lampa && Lampa.Noty && typeof Lampa.Noty.show === 'function') {
-            Lampa.Noty.show(message);
-        } else {
-            console.log('[VPN Plugin] Lampa.Noty.show не доступен');
-        }
-    }
-
     function checkVPN() {
-        fetch('https://freegeoip.app/json/')
-            .then(res => res.json())
+        fetch('https://ipinfo.io/json?token=ce7ef8c0a3c947')
+            .then(response => {
+                if (!response.ok) throw new Error('Ошибка сети');
+                return response.json();
+            })
             .then(data => {
-                const country = data.country_code || '';
+                const country = data.country || '';
+
                 if (country !== 'RU') {
-                    showWarning(country);
+                    if (window.Lampa && Lampa.Noty && typeof Lampa.Noty.show === 'function') {
+                        Lampa.Noty.show('⚠️ Вы находитесь за пределами РФ или используете VPN. Отключите его для стабильной работы.');
+                    } else {
+                        console.warn('[VPN Plugin] Lampa.Noty.show не доступен');
+                    }
                 } else {
                     console.log('[VPN Plugin] IP из РФ, всё в порядке');
                 }
             })
-            .catch(err => {
-                console.log('[VPN Plugin] Ошибка получения IP:', err);
+            .catch(error => {
+                console.error('[VPN Plugin] Ошибка получения IP-информации:', error);
             });
     }
 
     if (window.Lampa) {
         checkVPN();
     } else {
-        console.log('[VPN Plugin] Lampa не загружена');
+        console.warn('[VPN Plugin] Lampa не загружена');
     }
 })();
