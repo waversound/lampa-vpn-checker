@@ -1,9 +1,45 @@
 (function () {
     function getCountryFlag(code) {
-        // Преобразуем код страны (например, "US") в 🇺🇸
-        return code.toUpperCase().replace(/./g, char => 
+        return code.toUpperCase().replace(/./g, char =>
             String.fromCodePoint(127397 + char.charCodeAt())
         );
+    }
+
+    function showCustomBanner(message) {
+        const existing = document.getElementById('vpn-warning');
+        if (existing) existing.remove(); // Удалим предыдущее, если есть
+
+        const div = document.createElement('div');
+        div.id = 'vpn-warning';
+        div.style.position = 'fixed';
+        div.style.bottom = '5%';
+        div.style.left = '50%';
+        div.style.transform = 'translateX(-50%)';
+        div.style.background = 'rgba(0, 0, 0, 0.85)';
+        div.style.color = '#fff';
+        div.style.padding = '20px 25px';
+        div.style.fontSize = '20px';
+        div.style.borderRadius = '10px';
+        div.style.zIndex = '9999';
+        div.style.textAlign = 'center';
+        div.style.boxShadow = '0 0 15px rgba(0,0,0,0.5)';
+        div.innerText = message;
+
+        const btn = document.createElement('div');
+        btn.innerText = 'ОК';
+        btn.style.marginTop = '10px';
+        btn.style.padding = '8px 15px';
+        btn.style.background = '#ff5f5f';
+        btn.style.borderRadius = '6px';
+        btn.style.cursor = 'pointer';
+        btn.style.display = 'inline-block';
+        btn.style.fontWeight = 'bold';
+        btn.onclick = () => div.remove();
+
+        div.appendChild(document.createElement('br'));
+        div.appendChild(btn);
+
+        document.body.appendChild(div);
     }
 
     function checkVPN() {
@@ -21,12 +57,7 @@
 
                 if (countryCode !== 'RU') {
                     const message = `${flag} Вы находитесь в стране: ${countryName}. Возможно, включён VPN. Отключите его для стабильной работы.`;
-
-                    if (window.Lampa && Lampa.Noty && typeof Lampa.Noty.show === 'function') {
-                        // Увеличим длительность показа до 10 секунд
-                        Lampa.Noty.time = 10000;
-                        Lampa.Noty.show(message);
-                    }
+                    showCustomBanner(message);
                 } else {
                     console.log('[VPN Plugin] IP из РФ, всё в порядке.');
                 }
