@@ -19,8 +19,8 @@
             transform: 'translateX(-50%)',
             background: '#202020',
             color: '#fff',
-            padding: '24px 38px',        // увеличено примерно на 35%
-            fontSize: '12px',            // размер чуть увеличен (был 9px)
+            padding: '28px 43px',        // Увеличено на ~15% по сравнению с 24px 38px
+            fontSize: '12px',
             fontWeight: '400',
             borderRadius: '10px',
             zIndex: '9999',
