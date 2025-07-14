@@ -35,16 +35,16 @@ function showVPNBanner(country, ip) {
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s;
-            tab-index: 0; /* Для фокуса */
         }
-        .vpn-banner-close:hover, .vpn-banner-close:focus {
+        .vpn-banner-close:focus {
             background-color: #cc3333 !important;
-            outline: 2px solid #fff; /* Обводка для TV */
+            outline: 2px solid #fff;
         }
     `;
     document.head.appendChild(style);
 
-    const html = `
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
         <div class="vpn-warning-banner">
             <div style="font-size: 24px; margin-bottom: 10px;">
                 ⚠️ VPN Обнаружен
@@ -54,35 +54,32 @@ function showVPNBanner(country, ip) {
                 Страна: <b>${country}</b><br>
                 Отключите VPN для стабильной работы Lampa.
             </div>
-            <button class="vpn-banner-close" tabindex="0">Ок</button>
+            <button class="vpn-banner-close">Ок</button>
         </div>
     `;
-
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = html;
     document.body.appendChild(wrapper);
 
     const banner = wrapper.querySelector('.vpn-warning-banner');
     const btn = wrapper.querySelector('.vpn-banner-close');
 
-    // Автофокус на кнопку
-    btn.focus();
+    // Фокус на кнопку (работает в Lampa)
+    setTimeout(() => btn.focus(), 100); // Небольшая задержка для гарантии фокуса
 
-    // Закрытие по клику
-    btn.addEventListener('click', closeBanner);
-
-    // Закрытие по Enter (для TV)
-    btn.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.keyCode === 13) {
-            closeBanner();
-        }
-    });
-
-    function closeBanner() {
+    // Закрытие по клику и OK/Enter
+    const closeBanner = () => {
         banner.style.animation = 'fadeOut 0.4s forwards';
         banner.addEventListener('animationend', () => {
             wrapper.remove();
             style.remove();
         });
-    }
+    };
+
+    btn.addEventListener('click', closeBanner);
+
+    // Обработка нажатий с пульта (для TV)
+    btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.keyCode === 13 || e.key === 'OK') {
+            closeBanner();
+        }
+    });
 }
