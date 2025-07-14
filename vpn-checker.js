@@ -1,110 +1,91 @@
-(function () {
+(function() {
+    // Проверяем VPN через самый стабильный API
     function checkVPN() {
         fetch('https://ipapi.co/json/')
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 if (data.country && data.country !== 'RU') {
-                    showVPNBanner(data.country_name || data.country, data.ip);
+                    showBlockingBanner(data.country, data.ip);
                 }
             })
-            .catch(console.error);
+            .catch(e => console.error('VPN check failed:', e));
     }
 
-    function showVPNBanner(country, ip) {
-        // Создаём "затемнение" под баннером (блокирует клики под ним)
-        const overlay = document.createElement('div');
-        overlay.style = `
+    function showBlockingBanner(country, ip) {
+        // 1. Создаём "тюремный" контейнер, который перехватит ВСЁ
+        const prison = document.createElement('div');
+        prison.style = `
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 9998;
+            background: rgba(0,0,0,0.9);
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         `;
 
-        // Генерация уникальных ID
-        const bannerId = 'vpn-banner-' + Date.now();
-        const btnId = bannerId + '-btn';
-
-        // Стили (добавляем !important для приоритета)
-        const style = document.createElement('style');
-        style.textContent = `
-            #${bannerId} {
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
+        // 2. Баннер с единственной кнопкой
+        prison.innerHTML = `
+            <div style="
                 background: #222;
                 padding: 25px;
                 border-radius: 12px;
-                z-index: 9999;
-                color: white;
                 text-align: center;
-                min-width: 300px;
-                box-shadow: 0 0 30px black;
-            }
-            #${btnId} {
-                background: #f33;
-                color: white;
-                border: none;
-                padding: 12px 24px;
-                margin-top: 20px;
-                border-radius: 6px;
-                font-size: 18px;
-                cursor: pointer;
-            }
-            #${btnId}:focus {
-                outline: 3px solid white !important;
-                background: #d22 !important;
-            }
-        `;
-
-        // HTML баннера
-        const bannerHTML = `
-            <div id="${bannerId}">
-                <h2 style="margin-top:0">⚠️ VPN Обнаружен</h2>
-                <p><b>IP:</b> ${ip}<br><b>Страна:</b> ${country}</p>
-                <p>Отключите VPN для работы Lampa</p>
-                <button id="${btnId}">OK</button>
+                max-width: 80%;
+            ">
+                <h2 style="color: #ff4444; margin-top: 0;">⚠️ Обнаружен VPN</h2>
+                <p style="font-size: 16px;">Ваш IP: <b>${ip}</b><br>Страна: <b>${country}</b></p>
+                <p>Для работы Lampa требуется отключить VPN</p>
+                <button id="vpn-ok-btn" style="
+                    background: #ff3333;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    font-size: 18px;
+                    border-radius: 6px;
+                    margin-top: 15px;
+                ">OK</button>
             </div>
         `;
 
-        // Вставляем в DOM
-        document.head.appendChild(style);
-        document.body.appendChild(overlay);
-        overlay.insertAdjacentHTML('afterend', bannerHTML);
+        document.body.appendChild(prison);
 
-        // Фокусируем кнопку с задержкой
-        setTimeout(() => {
-            const btn = document.getElementById(btnId);
-            if (btn) {
-                btn.focus();
+        // 3. Жёсткий контроль фокуса и событий
+        const btn = document.getElementById('vpn-ok-btn');
+        
+        // Принудительный фокус каждые 100 мс (на случай перехвата Lampa)
+        const focusKeeper = setInterval(() => btn.focus(), 100);
 
-                // Жёсткий перехват всех событий
-                const handleAction = () => {
-                    overlay.remove();
-                    document.getElementById(bannerId).remove();
-                    style.remove();
-                };
+        // Обработчик закрытия
+        const closeBanner = () => {
+            clearInterval(focusKeeper);
+            prison.remove();
+        };
 
-                // Все возможные способы нажатия
-                btn.onclick = handleAction;
-                btn.onkeydown = (e) => [13, 415].includes(e.keyCode) && handleAction(); // Enter и OK
+        // Все возможные способы нажатия
+        btn.onclick = closeBanner;
+        btn.onkeydown = (e) => {
+            if ([13, 415, 37, 38, 39, 40].includes(e.keyCode)) {
+                e.stopPropagation(); // Блокируем всплытие
+                closeBanner();
             }
-        }, 300);
+        };
 
-        // Ловушка фокуса (не даёт уйти фокусу с баннера)
-        document.addEventListener('keydown', (e) => {
-            if ([37, 38, 39, 40].includes(e.keyCode)) { // Стрелки
-                const btn = document.getElementById(btnId);
-                btn && btn.focus();
-            }
-        });
+        // 4. Блокируем ВСЕ клавиши вне кнопки
+        prison.onkeydown = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            btn.focus();
+        };
     }
 
-    // Запуск после загрузки Lampa
+    // Запуск после полной загрузки
     if (window.Lampa) {
-        setTimeout(checkVPN, 1500);
+        setTimeout(checkVPN, 2000);
+    } else {
+        document.addEventListener('DOMContentLoaded', checkVPN);
     }
 })();
