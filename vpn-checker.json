@@ -1,29 +1,29 @@
-{
-    "ip": "149.154.161.233",
-    "network": "149.154.160.0/22",
-    "version": "IPv4",
-    "city": "London",
-    "region": "England",
-    "region_code": "ENG",
-    "country": "GB",
-    "country_name": "United Kingdom",
-    "country_code": "GB",
-    "country_code_iso3": "GBR",
-    "country_capital": "London",
-    "country_tld": ".uk",
-    "continent_code": "EU",
-    "in_eu": false,
-    "postal": "EC1N",
-    "latitude": 51.5081,
-    "longitude": -0.1278,
-    "timezone": "Europe/London",
-    "utc_offset": "+0100",
-    "country_calling_code": "+44",
-    "currency": "GBP",
-    "currency_name": "Pound",
-    "languages": "en-GB,cy-GB,gd",
-    "country_area": 244820.0,
-    "country_population": 66488991,
-    "asn": "AS62041",
-    "org": "Telegram Messenger Inc"
-}
+(() => {
+    const vpnWarningShownKey = 'vpn-warning-shown';
+
+    if (sessionStorage.getItem(vpnWarningShownKey)) return;
+
+    fetch('https://ipapi.co/json/')
+        .then(response => response.json())
+        .then(data => {
+            const suspiciousASN = [
+                'AS12389', 'AS9009', 'AS8100', 'AS16509'
+            ];
+
+            const suspiciousOrgs = [
+                'M247', 'DigitalOcean', 'Amazon', 'Google', 'Hetzner', 'OVH', 'Contabo'
+            ];
+
+            const isSuspicious =
+                suspiciousASN.includes(data.asn) ||
+                suspiciousOrgs.some(org => data.org?.includes(org));
+
+            if (isSuspicious) {
+                alert("⚠️ Обнаружено использование VPN или прокси. Пожалуйста, отключите его для корректной работы приложения Lampa.");
+                sessionStorage.setItem(vpnWarningShownKey, 'true');
+            }
+        })
+        .catch(e => {
+            console.warn('VPN-проверка не удалась:', e);
+        });
+})();
