@@ -5,22 +5,22 @@
         );
     }
 
-    function showStyledLampaBanner(message) {
+    function showStyledLampaBanner(countryName, flag) {
         const existing = document.getElementById('vpn-warning');
         if (existing) existing.remove();
 
-        const div = document.createElement('div');
-        div.id = 'vpn-warning';
+        const container = document.createElement('div');
+        container.id = 'vpn-warning';
 
-        Object.assign(div.style, {
+        Object.assign(container.style, {
             position: 'fixed',
             bottom: '100px',
             left: '50%',
             transform: 'translateX(-50%)',
             background: '#202020',
             color: '#fff',
-            padding: '9px 14px',       // в 2 раза меньше отступы
-            fontSize: '9px',           // в 2 раза меньше шрифт (было 18)
+            padding: '24px 38px',        // увеличено примерно на 35%
+            fontSize: '12px',            // размер чуть увеличен (был 9px)
             fontWeight: '400',
             borderRadius: '10px',
             zIndex: '9999',
@@ -29,18 +29,38 @@
             maxWidth: '90%',
             transition: 'opacity 0.3s ease',
             opacity: '0',
+            lineHeight: '1.4',
+            fontFamily: 'Arial, sans-serif',
         });
 
-        div.textContent = message;
-        document.body.appendChild(div);
+        // Основной заголовок
+        const mainText = document.createElement('div');
+        mainText.textContent = 'Отключите VPN';
+        Object.assign(mainText.style, {
+            fontWeight: '700',
+            fontSize: '18px',
+            marginBottom: '8px',
+        });
+
+        // Подтекст с названием страны и флагом
+        const subText = document.createElement('div');
+        subText.textContent = `Вы находитесь в стране: ${countryName} ${flag}. Пожалуйста, отключите VPN для стабильной работы.`;
+        Object.assign(subText.style, {
+            fontWeight: '400',
+            fontSize: '14px',
+        });
+
+        container.appendChild(mainText);
+        container.appendChild(subText);
+        document.body.appendChild(container);
 
         requestAnimationFrame(() => {
-            div.style.opacity = '1';
+            container.style.opacity = '1';
         });
 
         setTimeout(() => {
-            div.style.opacity = '0';
-            setTimeout(() => div.remove(), 300);
+            container.style.opacity = '0';
+            setTimeout(() => container.remove(), 300);
         }, 5000);
     }
 
@@ -58,8 +78,7 @@
                 console.log(`[VPN Plugin] Обнаружена страна: ${countryName} (${countryCode})`);
 
                 if (countryCode !== 'RU') {
-                    const message = `Вы находитесь в стране: ${countryName} ${flag}. Возможно включён VPN. Пожалуйста, отключите его для стабильной работы.`;
-                    showStyledLampaBanner(message);
+                    showStyledLampaBanner(countryName, flag);
                 } else {
                     console.log('[VPN Plugin] IP из РФ, всё в порядке.');
                 }
