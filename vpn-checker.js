@@ -19,30 +19,29 @@
             transform: 'translateX(-50%)',
             background: '#202020',
             color: '#fff',
-            padding: '28px 43px',        // Увеличено на ~15% по сравнению с 24px 38px
-            fontSize: '12px',
-            fontWeight: '400',
-            borderRadius: '10px',
-            zIndex: '9999',
-            textAlign: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
-            maxWidth: '90%',
-            transition: 'opacity 0.3s ease',
-            opacity: '0',
-            lineHeight: '1.4',
+            padding: '20px 30px',
             fontFamily: 'Arial, sans-serif',
+            maxWidth: '400px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
+            textAlign: 'center',
+            zIndex: '9999',
+            lineHeight: '1.4',
+            opacity: '0',
+            transition: 'opacity 0.3s ease',
+            userSelect: 'none',
         });
 
-        // Основной заголовок
+        // Заголовок
         const mainText = document.createElement('div');
         mainText.textContent = 'Отключите VPN';
         Object.assign(mainText.style, {
             fontWeight: '700',
-            fontSize: '18px',
+            fontSize: '16px',
             marginBottom: '8px',
         });
 
-        // Подтекст с названием страны и флагом
+        // Подтекст
         const subText = document.createElement('div');
         subText.textContent = `Вы находитесь в стране: ${countryName} ${flag}. Пожалуйста, отключите VPN для стабильной работы.`;
         Object.assign(subText.style, {
