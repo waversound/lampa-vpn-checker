@@ -1,4 +1,11 @@
 (function () {
+    function getCountryFlag(code) {
+        // Преобразуем код страны (например, "US") в 🇺🇸
+        return code.toUpperCase().replace(/./g, char => 
+            String.fromCodePoint(127397 + char.charCodeAt())
+        );
+    }
+
     function checkVPN() {
         fetch('https://ipwhois.app/json/')
             .then(response => {
@@ -6,11 +13,20 @@
                 return response.json();
             })
             .then(data => {
-                const country = data.country_code || '';
-                console.log('[VPN Plugin] Обнаружен код страны:', country);
+                const countryCode = data.country_code || '';
+                const countryName = data.country || '';
+                const flag = getCountryFlag(countryCode);
 
-                if (country !== 'RU') {
-                    Lampa.Noty.show(`⚠️ Вы находитесь в стране: ${country}. Возможно, включён VPN. Отключите его для стабильной работы.`);
+                console.log(`[VPN Plugin] Обнаружена страна: ${countryName} (${countryCode})`);
+
+                if (countryCode !== 'RU') {
+                    const message = `${flag} Вы находитесь в стране: ${countryName}. Возможно, включён VPN. Отключите его для стабильной работы.`;
+
+                    if (window.Lampa && Lampa.Noty && typeof Lampa.Noty.show === 'function') {
+                        // Увеличим длительность показа до 10 секунд
+                        Lampa.Noty.time = 10000;
+                        Lampa.Noty.show(message);
+                    }
                 } else {
                     console.log('[VPN Plugin] IP из РФ, всё в порядке.');
                 }
