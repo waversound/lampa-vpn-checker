@@ -1,5 +1,4 @@
 (function () {
-    // Функция для получения emoji-флага по коду страны
     function getFlagEmoji(countryCode) {
         if (!countryCode || countryCode.length !== 2) return '';
         const codePoints = countryCode
@@ -10,30 +9,26 @@
     }
 
     function checkVPN() {
-        fetch('https://ip-api.com/json/?fields=status,countryCode')
+        fetch('https://ipinfo.io/json?token=ce7ef8c0a3c947')
             .then(response => response.json())
             .then(data => {
-                if (data.status === 'success') {
-                    const country = data.countryCode || '';
+                const country = data.country || '';
 
-                    if (country !== 'RU') {
-                        const flag = getFlagEmoji(country);
-                        const message = `${flag} Обнаружен VPN или Вы вне России (${country}). Пожалуйста, отключите VPN для корректной работы.`;
+                if (country !== 'RU') {
+                    const flag = getFlagEmoji(country);
+                    const message = `${flag} Обнаружен VPN или Вы вне России (${country}). Пожалуйста, отключите VPN для корректной работы.`;
 
-                        if (!localStorage.getItem('vpnWarningShown')) {
-                            if (window.Lampa && Lampa.Noty && typeof Lampa.Noty.show === 'function') {
-                                Lampa.Noty.show(message);
-                                localStorage.setItem('vpnWarningShown', 'true');
-                            } else {
-                                console.log('[VPN Plugin] Lampa.Noty.show не доступен');
-                            }
+                    if (!localStorage.getItem('vpnWarningShown')) {
+                        if (window.Lampa && Lampa.Noty && typeof Lampa.Noty.show === 'function') {
+                            Lampa.Noty.show(message);
+                            localStorage.setItem('vpnWarningShown', 'true');
+                        } else {
+                            console.log('[VPN Plugin] Lampa.Noty.show не доступен');
                         }
-                    } else {
-                        console.log('[VPN Plugin] IP из РФ, всё в порядке');
-                        localStorage.removeItem('vpnWarningShown');
                     }
                 } else {
-                    console.log('[VPN Plugin] Не удалось получить статус IP');
+                    console.log('[VPN Plugin] IP из РФ, всё в порядке');
+                    localStorage.removeItem('vpnWarningShown');
                 }
             })
             .catch(error => {
