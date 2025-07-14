@@ -5,11 +5,14 @@
             .then(data => {
                 const country = data.country || '';
 
-                // Если страна — не Россия, показываем предупреждение
                 if (country !== 'RU') {
-                    Lampa.Noty.show('⚠️ Вы находитесь за пределами РФ или используете VPN. Отключите его для стабильной работы.');
+                    if (!localStorage.getItem('vpnWarningShown')) {
+                        Lampa.Noty.show('⚠️ Вы находитесь за пределами РФ или используете VPN. Отключите его для стабильной работы.');
+                        localStorage.setItem('vpnWarningShown', 'true');
+                    }
                 } else {
                     console.log('[VPN Plugin] IP из РФ, всё в порядке');
+                    localStorage.removeItem('vpnWarningShown');
                 }
             })
             .catch(error => {
@@ -17,9 +20,9 @@
             });
     }
 
-    if (window.Lampa) {
+    if (window.Lampa && Lampa.Noty && typeof Lampa.Noty.show === 'function') {
         checkVPN();
     } else {
-        console.log('[VPN Plugin] Lampa не загружена');
+        console.log('[VPN Plugin] Lampa.Noty.show не доступен');
     }
 })();
