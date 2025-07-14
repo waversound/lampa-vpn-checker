@@ -1,43 +1,71 @@
 (function () {
     function checkVPN() {
-        fetch('http://ip-api.com/json/?fields=status,status,country,countryCode')
-            .then(res => res.json())
+        fetch('http://ip-api.com/json/?fields=status,country,countryCode,query')
+            .then(response => response.json())
             .then(data => {
-                if (data.status === 'success' && data.countryCode !== 'RU') {
-                    showCustomToast(data.countryCode);
+                console.log('[VPN Plugin] IP-ответ:', data);
+
+                if (data.status === 'success') {
+                    if (data.countryCode !== 'RU') {
+                        showVPNBanner(data.country, data.query);
+                    } else {
+                        console.log('[VPN Plugin] IP из РФ, всё нормально');
+                    }
+                } else {
+                    console.log('[VPN Plugin] Не удалось определить IP');
                 }
             })
-            .catch(e => console.log('[VPN Plugin] Ошибка IP:', e));
+            .catch(error => {
+                console.log('[VPN Plugin] Ошибка получения IP-информации:', error);
+            });
     }
 
-    function showCustomToast(countryCode) {
-        if(document.getElementById('vpn-toast')) return; // чтобы не дублировать
+    function showVPNBanner(country, ip) {
+        const html = `
+            <div class="vpn-warning-banner" style="
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(30,30,30,0.95);
+                padding: 20px 25px;
+                border-radius: 16px;
+                z-index: 9999;
+                text-align: center;
+                color: #fff;
+                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                max-width: 90%;
+            ">
+                <div style="font-size: 24px; margin-bottom: 10px;">
+                    ⚠️ VPN Обнаружен
+                </div>
+                <div style="font-size: 16px; margin-bottom: 20px;">
+                    🛡️ Ваш IP: <b>${ip}</b><br>
+                    Страна: <b>${country}</b><br>
+                    Отключите VPN для стабильной работы Lampa.
+                </div>
+                <button class="vpn-banner-close" style="
+                    padding: 10px 20px;
+                    background: #ff4444;
+                    color: #fff;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    cursor: pointer;
+                ">
+                    Ок
+                </button>
+            </div>
+        `;
 
-        const toast = document.createElement('div');
-        toast.id = 'vpn-toast';
-        toast.textContent = `⚠️ Вы не в России (${countryCode}). Отключите VPN для стабильной работы.`;
-        toast.style.position = 'fixed';
-        toast.style.bottom = '20px';
-        toast.style.left = '50%';
-        toast.style.transform = 'translateX(-50%)';
-        toast.style.background = 'rgba(0,0,0,0.8)';
-        toast.style.color = '#fff';
-        toast.style.padding = '15px 25px';
-        toast.style.borderRadius = '10px';
-        toast.style.fontSize = '16px';
-        toast.style.zIndex = 99999;
-        toast.style.maxWidth = '90%';
-        toast.style.textAlign = 'center';
-        toast.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
-        toast.style.fontFamily = 'Arial, sans-serif';
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        document.body.appendChild(wrapper);
 
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.transition = 'opacity 0.5s ease';
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 500);
-        }, 10000);
+        const btn = wrapper.querySelector('.vpn-banner-close');
+        btn.addEventListener('click', () => {
+            wrapper.remove();
+        });
     }
 
     if (window.Lampa) {
