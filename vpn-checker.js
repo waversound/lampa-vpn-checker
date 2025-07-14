@@ -78,6 +78,9 @@
         const banner = wrapper.querySelector('.vpn-warning-banner');
         const btn = wrapper.querySelector('.vpn-banner-close');
 
+        // Фокус на кнопке «Ок»
+        btn.focus();
+
         btn.addEventListener('click', () => {
             banner.style.animation = 'fadeOut 0.4s forwards';
             banner.addEventListener('animationend', () => {
