@@ -12,7 +12,6 @@
         const div = document.createElement('div');
         div.id = 'vpn-warning';
 
-        // Стилизация как у уведомлений Lampa
         Object.assign(div.style, {
             position: 'fixed',
             bottom: '100px',
@@ -35,7 +34,6 @@
         div.textContent = message;
         document.body.appendChild(div);
 
-        // Плавное появление
         requestAnimationFrame(() => {
             div.style.opacity = '1';
         });
@@ -43,7 +41,7 @@
         setTimeout(() => {
             div.style.opacity = '0';
             setTimeout(() => div.remove(), 300);
-        }, 5000); // 5 секунд
+        }, 5000);
     }
 
     function checkVPN() {
@@ -60,7 +58,7 @@
                 console.log(`[VPN Plugin] Обнаружена страна: ${countryName} (${countryCode})`);
 
                 if (countryCode !== 'RU') {
-                    const message = `You are in: ${countryName} ${flag}. VPN might be enabled. Please disable it for stable operation.`;
+                    const message = `Вы находитесь в стране: ${countryName} ${flag}. Возможно включён VPN. Пожалуйста, отключите его для стабильной работы.`;
                     showStyledLampaBanner(message);
                 } else {
                     console.log('[VPN Plugin] IP из РФ, всё в порядке.');
