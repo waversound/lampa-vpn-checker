@@ -68,7 +68,7 @@
             container.style.opacity = '0';
             container.style.transform = 'translateX(-50%) translateY(20px)';
             setTimeout(() => container.remove(), 400);
-        }, 7000);
+        }, 5000);
     }
 
     function checkVPN() {
