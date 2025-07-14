@@ -19,8 +19,8 @@
             transform: 'translateX(-50%)',
             background: '#202020',
             color: '#fff',
-            padding: '18px 28px',
-            fontSize: '18px',
+            padding: '9px 14px',       // в 2 раза меньше отступы
+            fontSize: '9px',           // в 2 раза меньше шрифт (было 18)
             fontWeight: '400',
             borderRadius: '10px',
             zIndex: '9999',
