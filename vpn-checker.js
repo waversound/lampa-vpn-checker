@@ -16,10 +16,10 @@
             position: 'fixed',
             bottom: '80px',
             left: '50%',
-            transform: 'translateX(-50%)',
+            transform: 'translateX(-50%) translateY(20px)',
             background: '#202020',
             color: '#fff',
-            padding: '15px 22px',    // уменьшено на 7%
+            padding: '15px 22px',
             fontFamily: 'Arial, sans-serif',
             maxWidth: '320px',
             borderRadius: '6.4px',
@@ -28,11 +28,10 @@
             zIndex: '9999',
             lineHeight: '1.4',
             opacity: '0',
-            transition: 'opacity 0.3s ease',
+            transition: 'opacity 0.4s ease, transform 0.4s ease',
             userSelect: 'none',
         });
 
-        // Заголовок
         const mainText = document.createElement('div');
         mainText.textContent = 'Отключите VPN';
         Object.assign(mainText.style, {
@@ -41,7 +40,6 @@
             marginBottom: '6.4px',
         });
 
-        // Подтекст
         const subText = document.createElement('div');
         subText.textContent = `Вы находитесь в стране: ${countryName} ${flag}. Пожалуйста, отключите VPN для стабильной работы.`;
         Object.assign(subText.style, {
@@ -55,12 +53,14 @@
 
         requestAnimationFrame(() => {
             container.style.opacity = '1';
+            container.style.transform = 'translateX(-50%) translateY(0)';
         });
 
         setTimeout(() => {
             container.style.opacity = '0';
-            setTimeout(() => container.remove(), 300);
-        }, 5000);
+            container.style.transform = 'translateX(-50%) translateY(20px)';
+            setTimeout(() => container.remove(), 400);
+        }, 7000);
     }
 
     function checkVPN() {
