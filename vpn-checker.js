@@ -30,6 +30,9 @@
             opacity: '0',
             transition: 'opacity 0.4s ease, transform 0.4s ease',
             userSelect: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
         });
 
         const mainText = document.createElement('div');
@@ -38,13 +41,18 @@
             fontWeight: '700',
             fontSize: '12.8px',
             marginBottom: '6.4px',
+            display: 'block',
+            width: '100%',
         });
 
         const subText = document.createElement('div');
-        subText.textContent = `Вы находитесь в стране: ${countryName} ${flag}. Отключите VPN для стабильной работы.`;
+        subText.textContent = `Вы находитесь в стране: ${countryName} ${flag}.\nПожалуйста, отключите VPN для стабильной работы.`;
         Object.assign(subText.style, {
             fontWeight: '400',
             fontSize: '11.2px',
+            whiteSpace: 'pre-line',
+            display: 'block',
+            width: '100%',
         });
 
         container.appendChild(mainText);
