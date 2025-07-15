@@ -1,10 +1,51 @@
 (function () {
     function getCountryFlag(code) {
-        if (!code || code.length !== 2) return '';
-        return code.toUpperCase().split('').map(c => 
-            String.fromCodePoint(127397 + c.charCodeAt(0))
-        ).join('');
+        return code.toUpperCase().replace(/./g, char =>
+            String.fromCodePoint(127397 + char.charCodeAt())
+        );
     }
+
+    const countries = {
+        "RU": "Россия",
+        "US": "США",
+        "CN": "Китай",
+        "DE": "Германия",
+        "FR": "Франция",
+        "GB": "Великобритания",
+        "NL": "Нидерланды",
+        "CA": "Канада",
+        "JP": "Япония",
+        "KR": "Южная Корея",
+        "SG": "Сингапур",
+        "UA": "Украина",
+        "PL": "Польша",
+        "IT": "Италия",
+        "ES": "Испания",
+        "SE": "Швеция",
+        "NO": "Норвегия",
+        "FI": "Финляндия",
+        "CH": "Швейцария",
+        "BE": "Бельгия",
+        "AT": "Австрия",
+        "BR": "Бразилия",
+        "MX": "Мексика",
+        "IN": "Индия",
+        "ZA": "ЮАР",
+        "TR": "Турция",
+        "IL": "Израиль",
+        "AE": "ОАЭ",
+        "HK": "Гонконг",
+        "NZ": "Новая Зеландия",
+        "CZ": "Чехия",
+        "DK": "Дания",
+        "IE": "Ирландия",
+        "PT": "Португалия",
+        "GR": "Греция",
+        "HU": "Венгрия",
+        "RO": "Румыния",
+        "BG": "Болгария"
+        // можно добавить ещё по желанию
+    };
 
     function showStyledLampaBanner(countryName, flag) {
         const existing = document.getElementById('vpn-warning');
@@ -12,6 +53,7 @@
 
         const container = document.createElement('div');
         container.id = 'vpn-warning';
+
         Object.assign(container.style, {
             position: 'fixed',
             bottom: '80px',
@@ -46,7 +88,7 @@
         });
 
         const subText = document.createElement('div');
-        subText.textContent = `Вы находитесь в стране: ${countryName} ${flag}.\nОтключите VPN для стабильной работы.`;
+        subText.textContent = `Вы подключены к сети ${countryName} ${flag}.\nОтключите VPN для стабильной работы.`;
         Object.assign(subText.style, {
             fontWeight: '400',
             fontSize: '11.2px',
@@ -72,26 +114,29 @@
     }
 
     function checkVPN() {
-        fetch('http://ip-api.com/json/?fields=status,country,countryCode')
-            .then(r => {
-                if (!r.ok) throw new Error('Сетевая ошибка');
-                return r.json();
+        fetch('https://ip-api.com/json/?fields=status,country,countryCode')
+            .then(response => {
+                if (!response.ok) throw new Error('Ошибка ответа от API');
+                return response.json();
             })
             .then(data => {
-                if (data.status !== 'success') throw new Error('Не удалось получить Geodata');
-                const countryName = data.country || '';
+                if(data.status !== 'success') {
+                    throw new Error('Не удалось определить IP данные');
+                }
                 const countryCode = data.countryCode || '';
+                const countryName = countries[countryCode] || data.country || 'Неизвестно';
                 const flag = getCountryFlag(countryCode);
-                console.log(`[VPN Plugin] Страна: ${countryName} (${countryCode})`);
+
+                console.log(`[VPN Plugin] Обнаружена страна: ${countryName} (${countryCode})`);
 
                 if (countryCode !== 'RU') {
                     showStyledLampaBanner(countryName, flag);
                 } else {
-                    console.log('[VPN Plugin] IP из РФ — всё в порядке');
+                    console.log('[VPN Plugin] IP из РФ, всё в порядке.');
                 }
             })
-            .catch(err => {
-                console.log('[VPN Plugin] Ошибка получения IP:', err);
+            .catch(error => {
+                console.log('[VPN Plugin] Ошибка получения IP:', error);
             });
     }
 
