@@ -1,9 +1,9 @@
 (function () {
     function getCountryFlag(code) {
         if (!code || code.length !== 2) return '';
-        return code.toUpperCase().replace(/./g, char =>
-            String.fromCodePoint(127397 + char.charCodeAt())
-        );
+        return code.toUpperCase().split('').map(c => 
+            String.fromCodePoint(127397 + c.charCodeAt(0))
+        ).join('');
     }
 
     function showStyledLampaBanner(countryName, flag) {
@@ -12,7 +12,6 @@
 
         const container = document.createElement('div');
         container.id = 'vpn-warning';
-
         Object.assign(container.style, {
             position: 'fixed',
             bottom: '80px',
@@ -73,4 +72,32 @@
     }
 
     function checkVPN() {
-        fetch('https://ipinfo.io/json?token=ce7ef8c0a3c947')
+        fetch('http://ip-api.com/json/?fields=status,country,countryCode')
+            .then(r => {
+                if (!r.ok) throw new Error('Сетевая ошибка');
+                return r.json();
+            })
+            .then(data => {
+                if (data.status !== 'success') throw new Error('Не удалось получить Geodata');
+                const countryName = data.country || '';
+                const countryCode = data.countryCode || '';
+                const flag = getCountryFlag(countryCode);
+                console.log(`[VPN Plugin] Страна: ${countryName} (${countryCode})`);
+
+                if (countryCode !== 'RU') {
+                    showStyledLampaBanner(countryName, flag);
+                } else {
+                    console.log('[VPN Plugin] IP из РФ — всё в порядке');
+                }
+            })
+            .catch(err => {
+                console.log('[VPN Plugin] Ошибка получения IP:', err);
+            });
+    }
+
+    if (window.Lampa) {
+        checkVPN();
+    } else {
+        console.log('[VPN Plugin] Lampa не загружена');
+    }
+})();
