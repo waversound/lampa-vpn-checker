@@ -1,72 +1,10 @@
 (function () {
     function getCountryFlag(code) {
-        return code.toUpperCase().replace(/./g, char =>
-            String.fromCodePoint(127397 + char.charCodeAt())
-        );
+        if (!code || code.length !== 2) return '';
+        return code.toUpperCase().split('').map(c => 
+            String.fromCodePoint(127397 + c.charCodeAt(0))
+        ).join('');
     }
-
-    const ruNames = {
-        'Russia': 'Россия',
-        'Germany': 'Германия',
-        'Netherlands': 'Нидерланды',
-        'United States': 'США',
-        'United Kingdom': 'Великобритания',
-        'France': 'Франция',
-        'Canada': 'Канада',
-        'Sweden': 'Швеция',
-        'Finland': 'Финляндия',
-        'Norway': 'Норвегия',
-        'Poland': 'Польша',
-        'Czechia': 'Чехия',
-        'Switzerland': 'Швейцария',
-        'Estonia': 'Эстония',
-        'Latvia': 'Латвия',
-        'Lithuania': 'Литва',
-        'Ukraine': 'Украина',
-        'Georgia': 'Грузия',
-        'Moldova': 'Молдова',
-        'Kazakhstan': 'Казахстан',
-        'Armenia': 'Армения',
-        'Belarus': 'Беларусь',
-        'Azerbaijan': 'Азербайджан',
-        'Turkey': 'Турция',
-        'Spain': 'Испания',
-        'Italy': 'Италия',
-        'Israel': 'Израиль',
-        'China': 'Китай',
-        'Japan': 'Япония',
-        'Singapore': 'Сингапур',
-        'Austria': 'Австрия',
-        'Belgium': 'Бельгия',
-        'Denmark': 'Дания',
-        'Romania': 'Румыния',
-        'Hungary': 'Венгрия',
-        'Bulgaria': 'Болгария',
-        'Slovakia': 'Словакия',
-        'Slovenia': 'Словения',
-        'Croatia': 'Хорватия',
-        'Serbia': 'Сербия',
-        'North Macedonia': 'Северная Македония',
-        'Greece': 'Греция',
-        'Portugal': 'Португалия',
-        'Ireland': 'Ирландия',
-        'Iceland': 'Исландия',
-        'Luxembourg': 'Люксембург',
-        'Liechtenstein': 'Лихтенштейн',
-        'Australia': 'Австралия',
-        'New Zealand': 'Новая Зеландия',
-        'South Korea': 'Южная Корея',
-        'Thailand': 'Таиланд',
-        'Malaysia': 'Малайзия',
-        'Philippines': 'Филиппины',
-        'Mexico': 'Мексика',
-        'Argentina': 'Аргентина',
-        'Chile': 'Чили',
-        'Colombia': 'Колумбия',
-        'South Africa': 'ЮАР',
-        'Vietnam': 'Вьетнам',
-        'Indonesia': 'Индонезия'
-    };
 
     function showStyledLampaBanner(countryName, flag) {
         const existing = document.getElementById('vpn-warning');
@@ -74,7 +12,6 @@
 
         const container = document.createElement('div');
         container.id = 'vpn-warning';
-
         Object.assign(container.style, {
             position: 'fixed',
             bottom: '80px',
@@ -82,10 +19,10 @@
             transform: 'translateX(-50%) translateY(20px)',
             background: '#202020',
             color: '#fff',
-            padding: '14px 20px',
+            padding: '15px 22px',
             fontFamily: 'Arial, sans-serif',
-            maxWidth: '300px',
-            borderRadius: '6px',
+            maxWidth: '320px',
+            borderRadius: '6.4px',
             boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
             textAlign: 'center',
             zIndex: '9999',
@@ -102,17 +39,17 @@
         mainText.textContent = 'Отключите VPN';
         Object.assign(mainText.style, {
             fontWeight: '700',
-            fontSize: '14px',
-            marginBottom: '6px',
+            fontSize: '12.8px',
+            marginBottom: '6.4px',
             display: 'block',
             width: '100%',
         });
 
         const subText = document.createElement('div');
-        subText.textContent = `Вы подключены к сети: ${countryName} ${flag}\nДля стабильной работы отключите VPN.`;
+        subText.textContent = `Вы находитесь в стране: ${countryName} ${flag}.\nОтключите VPN для стабильной работы.`;
         Object.assign(subText.style, {
             fontWeight: '400',
-            fontSize: '12px',
+            fontSize: '11.2px',
             whiteSpace: 'pre-line',
             display: 'block',
             width: '100%',
@@ -135,27 +72,26 @@
     }
 
     function checkVPN() {
-        fetch('https://ipwhois.app/json/')
-            .then(response => {
-                if (!response.ok) throw new Error('Ошибка ответа от API');
-                return response.json();
+        fetch('http://ip-api.com/json/?fields=status,country,countryCode')
+            .then(r => {
+                if (!r.ok) throw new Error('Сетевая ошибка');
+                return r.json();
             })
             .then(data => {
-                const code = data.country_code || '';
-                const name = data.country || '';
-                const flag = getCountryFlag(code);
-                const translatedName = ruNames[name] || name;
+                if (data.status !== 'success') throw new Error('Не удалось получить Geodata');
+                const countryName = data.country || '';
+                const countryCode = data.countryCode || '';
+                const flag = getCountryFlag(countryCode);
+                console.log(`[VPN Plugin] Страна: ${countryName} (${countryCode})`);
 
-                console.log(`[VPN Plugin] Обнаружена страна: ${name} (${code})`);
-
-                if (code !== 'RU') {
-                    showStyledLampaBanner(translatedName, flag);
+                if (countryCode !== 'RU') {
+                    showStyledLampaBanner(countryName, flag);
                 } else {
-                    console.log('[VPN Plugin] IP из РФ, всё в порядке.');
+                    console.log('[VPN Plugin] IP из РФ — всё в порядке');
                 }
             })
-            .catch(error => {
-                console.log('[VPN Plugin] Ошибка получения IP:', error);
+            .catch(err => {
+                console.log('[VPN Plugin] Ошибка получения IP:', err);
             });
     }
 
