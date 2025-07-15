@@ -69,36 +69,8 @@
             container.style.opacity = '0';
             container.style.transform = 'translateX(-50%) translateY(20px)';
             setTimeout(() => container.remove(), 400);
-        }, 5000);
+        }, 7000);
     }
 
     function checkVPN() {
-        fetch('https://ipwhois.app/json/')
-            .then(response => {
-                if (!response.ok) throw new Error('Ошибка ответа от API');
-                return response.json();
-            })
-            .then(data => {
-                const countryCode = data.country_code || '';
-                const countryName = data.country || '';
-                const flag = getCountryFlag(countryCode);
-
-                console.log(`[VPN Plugin] Обнаружена страна: ${countryName} (${countryCode})`);
-
-                if (countryCode !== 'RU') {
-                    showStyledLampaBanner(countryName, flag);
-                } else {
-                    console.log('[VPN Plugin] IP из РФ, всё в порядке.');
-                }
-            })
-            .catch(error => {
-                console.log('[VPN Plugin] Ошибка получения IP:', error);
-            });
-    }
-
-    if (window.Lampa) {
-        checkVPN();
-    } else {
-        console.log('[VPN Plugin] Lampa не загружена');
-    }
-})();
+        fetch('https://ipinfo.io/json?token=ce7ef8c0a3c947')
