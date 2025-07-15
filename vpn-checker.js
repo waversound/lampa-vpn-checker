@@ -44,7 +44,6 @@
         "HU": "Венгрия",
         "RO": "Румыния",
         "BG": "Болгария"
-        // можно добавить ещё по желанию
     };
 
     function showStyledLampaBanner(countryName, flag) {
@@ -114,16 +113,10 @@
     }
 
     function checkVPN() {
-        fetch('https://ip-api.com/json/?fields=status,country,countryCode')
-            .then(response => {
-                if (!response.ok) throw new Error('Ошибка ответа от API');
-                return response.json();
-            })
+        fetch('https://ipwho.is/')
+            .then(response => response.json())
             .then(data => {
-                if(data.status !== 'success') {
-                    throw new Error('Не удалось определить IP данные');
-                }
-                const countryCode = data.countryCode || '';
+                const countryCode = data.country_code || '';
                 const countryName = countries[countryCode] || data.country || 'Неизвестно';
                 const flag = getCountryFlag(countryCode);
 
