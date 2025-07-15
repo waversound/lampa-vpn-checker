@@ -1,7 +1,24 @@
 (function () {
+    const ruNames = {
+        'Russia': 'Россия',
+        'United States': 'США',
+        'Finland': 'Финляндия',
+        'Germany': 'Германия',
+        'France': 'Франция',
+        'Sweden': 'Швеция',
+        'Ukraine': 'Украина',
+        'Kazakhstan': 'Казахстан',
+        'Belarus': 'Белоруссия',
+        'Italy': 'Италия',
+        'Spain': 'Испания',
+        'China': 'Китай',
+        'Japan': 'Япония'
+        // При необходимости дополняй
+    };
+
     function getCountryFlag(code) {
         if (!code || code.length !== 2) return '';
-        return code.toUpperCase().split('').map(c => 
+        return code.toUpperCase().split('').map(c =>
             String.fromCodePoint(127397 + c.charCodeAt(0))
         ).join('');
     }
@@ -41,17 +58,15 @@
             fontWeight: '700',
             fontSize: '12.8px',
             marginBottom: '6.4px',
-            display: 'block',
             width: '100%',
         });
 
         const subText = document.createElement('div');
-        subText.textContent = `Вы находитесь в стране: ${countryName} ${flag}.\nОтключите VPN для стабильной работы.`;
+        subText.textContent = `Вы подключены к сети: ${countryName} ${flag}.\nОтключите VPN для стабильной работы.`;
         Object.assign(subText.style, {
             fontWeight: '400',
             fontSize: '11.2px',
             whiteSpace: 'pre-line',
-            display: 'block',
             width: '100%',
         });
 
@@ -78,14 +93,15 @@
                 return r.json();
             })
             .then(data => {
-                if (data.status !== 'success') throw new Error('Не удалось получить Geodata');
-                const countryName = data.country || '';
-                const countryCode = data.countryCode || '';
-                const flag = getCountryFlag(countryCode);
-                console.log(`[VPN Plugin] Страна: ${countryName} (${countryCode})`);
+                if (data.status !== 'success') throw new Error('API ошибка');
+                const eng = data.country || '';
+                const rus = ruNames[eng] || eng;
+                const code = data.countryCode || '';
+                const flag = getCountryFlag(code);
+                console.log(`[VPN Plugin] Страна: ${rus} (${code})`);
 
-                if (countryCode !== 'RU') {
-                    showStyledLampaBanner(countryName, flag);
+                if (code !== 'RU') {
+                    showStyledLampaBanner(rus, flag);
                 } else {
                     console.log('[VPN Plugin] IP из РФ — всё в порядке');
                 }
@@ -98,6 +114,8 @@
     if (window.Lampa) {
         checkVPN();
     } else {
-        console.log('[VPN Plugin] Lampa не загружена');
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.Lampa) checkVPN();
+        });
     }
 })();
