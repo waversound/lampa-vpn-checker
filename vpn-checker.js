@@ -1,49 +1,25 @@
 (function () {
     function getCountryFlag(code) {
-        return code.toUpperCase().replace(/./g, char =>
-            String.fromCodePoint(127397 + char.charCodeAt())
-        );
+        if (!code || code.length !== 2) return '';
+        return code.toUpperCase().split('').map(c =>
+            String.fromCodePoint(127397 + c.charCodeAt(0))
+        ).join('');
     }
 
-    const countries = {
-        "RU": "Россия",
-        "US": "США",
-        "CN": "Китай",
-        "DE": "Германия",
-        "FR": "Франция",
-        "GB": "Великобритания",
-        "NL": "Нидерланды",
-        "CA": "Канада",
-        "JP": "Япония",
-        "KR": "Южная Корея",
-        "SG": "Сингапур",
-        "UA": "Украина",
-        "PL": "Польша",
-        "IT": "Италия",
-        "ES": "Испания",
-        "SE": "Швеция",
-        "NO": "Норвегия",
-        "FI": "Финляндия",
-        "CH": "Швейцария",
-        "BE": "Бельгия",
-        "AT": "Австрия",
-        "BR": "Бразилия",
-        "MX": "Мексика",
-        "IN": "Индия",
-        "ZA": "ЮАР",
-        "TR": "Турция",
-        "IL": "Израиль",
-        "AE": "ОАЭ",
-        "HK": "Гонконг",
-        "NZ": "Новая Зеландия",
-        "CZ": "Чехия",
-        "DK": "Дания",
-        "IE": "Ирландия",
-        "PT": "Португалия",
-        "GR": "Греция",
-        "HU": "Венгрия",
-        "RO": "Румыния",
-        "BG": "Болгария"
+    // Словарь с переводом основных стран (можно расширить)
+    const countryTranslations = {
+        'US': 'США',
+        'FI': 'Финляндия',
+        'DE': 'Германия',
+        'NL': 'Нидерланды',
+        'FR': 'Франция',
+        'GB': 'Великобритания',
+        'CA': 'Канада',
+        'PL': 'Польша',
+        'UA': 'Украина',
+        'KZ': 'Казахстан',
+        'CN': 'Китай',
+        // Добавь остальные страны сюда...
     };
 
     function showStyledLampaBanner(countryName, flag) {
@@ -52,7 +28,6 @@
 
         const container = document.createElement('div');
         container.id = 'vpn-warning';
-
         Object.assign(container.style, {
             position: 'fixed',
             bottom: '80px',
@@ -87,7 +62,7 @@
         });
 
         const subText = document.createElement('div');
-        subText.textContent = `Вы подключены к сети ${countryName} ${flag}.\nОтключите VPN для стабильной работы.`;
+        subText.textContent = `Вы находитесь в стране: ${countryName} ${flag}.\nОтключите VPN для стабильной работы.`;
         Object.assign(subText.style, {
             fontWeight: '400',
             fontSize: '11.2px',
@@ -108,28 +83,33 @@
         setTimeout(() => {
             container.style.opacity = '0';
             container.style.transform = 'translateX(-50%) translateY(20px)';
-            setTimeout(() => container.remove(), 400);
+            setTimeout(() => container.remove(), 7000);
         }, 7000);
     }
 
     function checkVPN() {
-        fetch('https://ipwho.is/')
-            .then(response => response.json())
+        fetch('http://ip-api.com/json/?fields=status,country,countryCode')
+            .then(r => {
+                if (!r.ok) throw new Error('Сетевая ошибка');
+                return r.json();
+            })
             .then(data => {
-                const countryCode = data.country_code || '';
-                const countryName = countries[countryCode] || data.country || 'Неизвестно';
+                if (data.status !== 'success') throw new Error('Не удалось получить Geodata');
+                const countryCode = data.countryCode || '';
+                // Используем перевод из словаря или подставляем исходное название из API
+                const countryName = countryTranslations[countryCode] || data.country || '';
                 const flag = getCountryFlag(countryCode);
 
-                console.log(`[VPN Plugin] Обнаружена страна: ${countryName} (${countryCode})`);
+                console.log(`[VPN Plugin] Страна: ${countryName} (${countryCode})`);
 
                 if (countryCode !== 'RU') {
                     showStyledLampaBanner(countryName, flag);
                 } else {
-                    console.log('[VPN Plugin] IP из РФ, всё в порядке.');
+                    console.log('[VPN Plugin] IP из РФ — всё в порядке');
                 }
             })
-            .catch(error => {
-                console.log('[VPN Plugin] Ошибка получения IP:', error);
+            .catch(err => {
+                console.log('[VPN Plugin] Ошибка получения IP:', err);
             });
     }
 
